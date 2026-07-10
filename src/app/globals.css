@@ -20,7 +20,19 @@
 }
 
 body {
-  background: var(--background);
+  margin: 0;
+  background: #f4e3c8; /* warm fallback behind the fixed canvas */
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Lenis smooth-scroll recommended base styles. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
 }
