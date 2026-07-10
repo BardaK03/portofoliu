@@ -19,7 +19,8 @@
       "Bash(curl -sL -o public/hdri/citrus_orchard_road_puresky_1k.hdr \"https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/citrus_orchard_road_puresky_1k.hdr\" -w \"http=%{http_code} size=%{size_download}\\\\n\")",
       "mcp__plugin_ecc_chrome-devtools__evaluate_script",
       "mcp__plugin_ecc_chrome-devtools__take_screenshot",
-      "mcp__plugin_ecc_chrome-devtools__list_console_messages"
+      "mcp__plugin_ecc_chrome-devtools__list_console_messages",
+      "mcp__plugin_ecc_chrome-devtools__navigate_page"
     ]
   }
 }
