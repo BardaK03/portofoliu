@@ -1,63 +1,95 @@
 "use client";
 
 /**
- * Landmarks — Phase-2 placeholders.
+ * Landmarks — places the procedural models at each section's anchor.
  *
- * One colored, gently bobbing box per section anchor so we can tune the flight
- * choreography before real art exists. Phase 4 swaps these for floating
- * islands / balloons / airship / sun meshes at the same anchors.
+ * Each landmark bobs and slowly rotates. The Projects section scatters a small
+ * archipelago of islands around its orbit center so the camera's fly-around
+ * has things to sweep past.
  */
 import { useFrame } from "@react-three/fiber";
-import { useRef } from "react";
+import { useRef, type ReactNode } from "react";
 import type { Group } from "three";
-import { SECTIONS } from "@/lib/journey";
+import { SECTIONS, PROJECTS_ORBIT } from "@/lib/journey";
+import {
+  FloatingIsland,
+  Balloons,
+  Airship,
+  SunFinale,
+} from "./LandmarkModels";
 
-const COLORS: Record<string, string> = {
-  hero: "#ffd9a0",
-  about: "#8fd6a8",
-  skills: "#f6a5c0",
-  projects: "#9ec5ff",
-  work: "#c9b8ff",
-  contact: "#ffcf6b",
-};
-
-function Landmark({
+function Bob({
   anchor,
-  color,
-  seed,
+  seed = 0,
+  spin = 0.1,
+  children,
 }: {
-  anchor: [number, number, number];
-  color: string;
-  seed: number;
+  anchor: readonly [number, number, number];
+  seed?: number;
+  spin?: number;
+  children: ReactNode;
 }) {
   const ref = useRef<Group>(null);
   useFrame((state) => {
     if (!ref.current) return;
     const t = state.clock.elapsedTime + seed;
-    ref.current.position.y = anchor[1] + Math.sin(t * 0.6) * 0.4;
-    ref.current.rotation.y = t * 0.2;
+    ref.current.position.y = anchor[1] + Math.sin(t * 0.5) * 0.4;
+    ref.current.rotation.y = t * spin;
   });
   return (
-    <group ref={ref} position={anchor}>
-      <mesh castShadow receiveShadow>
-        <boxGeometry args={[4, 4, 4]} />
-        <meshStandardMaterial color={color} roughness={0.6} />
-      </mesh>
+    <group ref={ref} position={[anchor[0], anchor[1], anchor[2]]}>
+      {children}
     </group>
   );
 }
 
-export function Landmarks() {
+function ProjectsArchipelago() {
+  const { center, radius } = PROJECTS_ORBIT;
+  const isles = [0, 1, 2, 3, 4];
   return (
     <>
-      {SECTIONS.filter((s) => s.id !== "hero").map((s, i) => (
-        <Landmark
-          key={s.id}
-          anchor={s.anchor}
-          color={COLORS[s.id]}
-          seed={i * 1.7}
-        />
-      ))}
+      {isles.map((i) => {
+        const a = (i / isles.length) * Math.PI * 2;
+        const anchor = [
+          center.x + Math.cos(a) * radius * 0.6,
+          center.y + (i % 2 === 0 ? 1.5 : -2),
+          center.z + Math.sin(a) * radius * 0.6,
+        ] as const;
+        return (
+          <Bob key={i} anchor={anchor} seed={i * 1.3} spin={0.05}>
+            <FloatingIsland scale={0.8 + (i % 3) * 0.25} />
+          </Bob>
+        );
+      })}
+    </>
+  );
+}
+
+export function Landmarks() {
+  const about = SECTIONS.find((s) => s.id === "about")!;
+  const skills = SECTIONS.find((s) => s.id === "skills")!;
+  const work = SECTIONS.find((s) => s.id === "work")!;
+  const contact = SECTIONS.find((s) => s.id === "contact")!;
+
+  return (
+    <>
+      <Bob anchor={about.anchor} seed={0.5}>
+        <FloatingIsland scale={1.3} withHouse />
+      </Bob>
+
+      <Bob anchor={skills.anchor} seed={1.5} spin={0.04}>
+        <Balloons />
+      </Bob>
+
+      <ProjectsArchipelago />
+
+      <Bob anchor={work.anchor} seed={2.5} spin={0.03}>
+        <Airship />
+      </Bob>
+
+      <group position={contact.anchor}>
+        <SunFinale />
+      </group>
     </>
   );
 }
